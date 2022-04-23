@@ -15,12 +15,11 @@
 - `gcloud beta emulators pubsub start --project=localprj --host-port='localhost:8043'`
 
 taskを使って、`task start-pubsub`で上記コマンドを実行させると停止時にプロセスが残る
-
 その場合は`sudo lsof -i:8043`でプロセスを調べてkill
 
 ### Pub/Subのトピックとサブスクリプションの作成
 
-- `create-pubsub-resouces`
+- `task create-pubsub-resouces`
 
 ### Cloud Functionsのビルド
 
@@ -32,4 +31,4 @@ taskを使って、`task start-pubsub`で上記コマンドを実行させると
 
 ### Cloud Functionsを実行
 
-- `publish-test`
+- `task publish-test`
