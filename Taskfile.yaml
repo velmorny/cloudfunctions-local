@@ -1,0 +1,70 @@
+---
+version: '3'
+
+tasks:
+  brewinstall:
+    desc: Install packages
+    label: '{{.TASK}}{{if .NAME}} - {{.NAME}}{{end}}'
+    vars:
+      BREW_FLAGS: '{{default "--formula" .BREW_FLAGS}}'
+      INSTALLED:
+        sh: brew list {{.BREW_FLAGS}} '{{.NAME}}' || echo ''
+      OUTDATED:
+        sh: brew outdated {{.BREW_FLAGS}} '{{.NAME}}' || echo ''
+    cmds:
+      - brew install {{.BREW_FLAGS}} '{{.NAME}}'
+    status:
+      - test -n '{{.INSTALLED}}'
+      - test ! -n '{{.OUTDATED}}'
+
+  install:
+    desc: Install tools for local development
+    cmds:
+      - task: install-pubsub-emulator
+      - task: install-buildpacks
+
+  install-pubsub-emulator:
+    desc: Install pubsub-emulator
+    cmds:
+      - gcloud components install pubsub-emulator
+      - gcloud components update
+
+  install-buildpacks:
+    desc: Install buildpacks
+    cmds:
+      - task: brewinstall
+        vars: { NAME: buildpacks/tap/pack }
+
+  start-pubsub:
+    desc: Start PubSub Emulator
+    cmds:
+      - gcloud beta emulators pubsub start --project=localprj --host-port='localhost:8043'
+
+  create-pubsub-resouces:
+    desc: Create PubSub Topic
+    cmds:
+      - curl -s -X PUT 'http://localhost:8043/v1/projects/localprj/topics/sampletopic'
+      - |
+        curl -s -X PUT 'http://localhost:8043/v1/projects/localprj/subscriptions/samplesub' \
+          -H 'Content-Type: application/json' \
+          --data '{"topic":"projects/localprj/topics/sampletopic","pushConfig":{"pushEndpoint":"http://localhost:8080/projects/localprj/topics/sampletopic"}}'
+
+  build:
+    cmds:
+      - |
+        pack build \
+          --builder gcr.io/buildpacks/builder:v1 \
+          --env GOOGLE_FUNCTION_SIGNATURE_TYPE=event \
+          --env GOOGLE_FUNCTION_TARGET=PubSubFunc \
+          local-function
+
+  run-pubsub-function:
+    cmds:
+      - docker run --rm -p 8080:8080 local-function
+
+  publish-test:
+    cmds:
+      - |
+        curl -s -X POST 'http://localhost:8043/v1/projects/localprj/topics/sampletopic:publish' \
+          -H 'Content-Type: application/json' \
+          --data '{"messages":[{"data":"eyJmb28iOiJiYXIifQ=="}]}'
