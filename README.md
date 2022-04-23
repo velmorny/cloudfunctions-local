@@ -4,7 +4,7 @@
 
 ## サンプルの実行手順
 
-- [task](https://taskfile.dev/)]を使用して実行している
+[task](https://taskfile.dev/)を使用して実行している
 
 ### インストール
 
