@@ -1,6 +1,6 @@
 # Cloud Functions (PubSub event) ローカル開発用サンプル
 
-参考：[ローカルでの開発](https://cloud.google.com/functions/docs/local-development#functions-clone-sample-repository-go)
+参考：[ローカルでの開発](https://cloud.google.com/functions/docs/local-development)
 
 ## サンプルの実行手順
 
